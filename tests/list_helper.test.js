@@ -76,3 +76,37 @@ describe('likes count', () => {
     expect(result).toBe(36)
   })
 })
+
+describe('favourite blog', () => {
+  test('blogs.length === 0', () => {
+    const result = listHelper.favoriteBlog([])
+    expect(result).toEqual({})
+  })
+
+  test('blogs.length === 1', () => {
+    const result = listHelper.favoriteBlog([blogs[0]])
+    expect(result).toEqual(blogs[0])
+  })
+
+  test('blogs.length > 1', () => {
+    const result = listHelper.favoriteBlog(blogs)
+    expect(result).toEqual(blogs[2])
+  })
+})
+
+describe('most blogs', () => {
+  test('blogs.length === 0', () => {
+    const result = listHelper.mostBlogs([])
+    expect(result).toEqual({})
+  })
+
+  test('blogs.length === 1', () => {
+    const result = listHelper.mostBlogs([blogs[0]])
+    expect(result).toEqual({ author: 'Michael Chan', blogs: 1 })
+  })
+
+  test('blogs.length > 1', () => {
+    const result = listHelper.mostBlogs(blogs)
+    expect(result).toEqual({ author: 'Robert C. Martin', blogs: 3 })
+  })
+})

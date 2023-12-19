@@ -46,7 +46,7 @@ describe('POST /api/blogs', () => {
     expect(response.body.map(r => r.url)).toContain('https://example.com/')
   })
 
-  test('likes property is 0 by default', async () => {
+  test('likes property of a blog is 0 by default', async () => {
     const newBlog = { title: 'Example Domain', url: 'https://example.com' }
     const blogsAtStart = await helper.blogsInDb()
 
@@ -75,7 +75,7 @@ describe('POST /api/blogs', () => {
 })
 
 describe('GET /api/blogs/:id', () => {
-  test('a specific blog can be viewed', async () => {
+  test('succeeds with a valid id', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToView = blogsAtStart[0]
 
@@ -99,10 +99,26 @@ describe('GET /api/blogs/:id', () => {
     expect(resultBlog.body._id).not.toBeDefined()
     expect(resultBlog.body.id).toBeDefined()
   })
+
+  test('fails with statuscode 404 if blog does not exist', async () => {
+    const validNonexistingId = await helper.nonExistingId()
+
+    await api
+      .get(`/api/blogs/${validNonexistingId}`)
+      .expect(404)
+  })
+
+  test('fails with statuscode 400 if id is invalid', async () => {
+    const invalidId = '5a3d5da59070081a82a3445'
+
+    await api
+      .get(`/api/blogs/${invalidId}`)
+      .expect(400)
+  })
 })
 
 describe('DELETE /api/blogs/:id', () => {
-  test('a blog can be deleted', async () => {
+  test('succeeds with status code 204 if id is valid', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
@@ -111,10 +127,25 @@ describe('DELETE /api/blogs/:id', () => {
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
+    expect(blogsAtEnd.map(r => r.url)).not.toContain(blogToDelete.url)
+  })
+})
 
-    const url = blogsAtEnd.map(r => r.url)
-    expect(url).not.toContain(blogToDelete.url)
+describe('PUT /api/blogs/:id', () => {
+  test('succeeds with status code 200 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send({ likes: blogToUpdate.likes + 1 })
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length)
+    expect(blogsAtEnd[0].likes).toEqual(blogToUpdate.likes + 1)
   })
 })
 

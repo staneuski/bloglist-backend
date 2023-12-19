@@ -1,7 +1,10 @@
-PUT http://localhost:3003/api/persons/65660bd51d0a92e385cfc1db HTTP/1.1
+PUT http://localhost:3003/api/blogs/658162fe01b40b8265d92b1a HTTP/1.1
 content-type: application/json
 
 {
-    "name": "Firstname Lastname",
-    "number": "05-00-7654321"
+  "title": "Example Domain",
+  "author": "Jane Doe",
+  "url": "https://example.com/",
+  "likes": 8,
+  "id": "658162fe01b40b8265d92b1a"
 }

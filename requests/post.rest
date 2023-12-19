@@ -1,8 +1,8 @@
-POST http://localhost:3003/api/persons/ HTTP/1.1
+POST http://localhost:3003/api/blogs/ HTTP/1.1
 content-type: application/json
 
 {
-    "name": "The name, author or url is missing"
+  "author": "The title or url is missing"
 }
 
 ###
@@ -10,8 +10,8 @@ POST http://localhost:3003/api/blogs/ HTTP/1.1
 content-type: application/json
 
 {
-  "name": "John Doe",
-  "title": "HTTP magic",
-  "url": "www.imgur.com/a/G6rU8",
+  "author": "John Doe",
+  "title": "Example Domain",
+  "url": "https://example.com/",
   "likes": 17
 }

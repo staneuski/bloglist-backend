@@ -3,6 +3,15 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer '))
+    return authorization.replace('Bearer ', '')
+  return null
+}
+
 blogsRouter.get('/', async (request, response) => { // eslint-disable-line no-unused-vars
   const blogs = await Blog
     .find({}).populate('user', { username: 1, name: 1 })
@@ -10,10 +19,18 @@ blogsRouter.get('/', async (request, response) => { // eslint-disable-line no-un
 })
 
 blogsRouter.post('/', async (request, response) => {
-  const user = await User.findById(request.body.author)
-  console.log(user)
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  if (!decodedToken.id)
+    return response.status(401).json({ error: 'token invalid' })
 
-  const blog = new Blog(request.body)
+  const user = await User.findById(decodedToken.id)
+  const blog = new Blog({
+    user: user._id,
+    url: request.body.url,
+    title: request.body.title,
+    author: request.body.author,
+    likes: request.body.likes
+  })
 
   const savedBlog = await blog.save()
   user.blogs = user.blogs.concat(savedBlog._id)
@@ -37,9 +54,9 @@ blogsRouter.delete('/:id', async (request, response) => {
 
 blogsRouter.put('/:id', (request, response, next) => {
   const blog = {
+    url: request.body.url,
     title: request.body.title,
     author: request.body.author,
-    url: request.body.url,
     likes: request.body.likes
   }
   Blog.findByIdAndUpdate(request.params.id, blog, {

@@ -1,0 +1,19 @@
+POST http://localhost:3003/api/blogs/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkpvaG5Eb2UiLCJpZCI6IjY1ODljZDc0MWI2ODRiMDZhNjI2MTMxOSIsImlhdCI6MTcwMzUzMDAxNX0.U8VWjeFL1aPBSDyO0UqpPGFMnOJzaFXgBL6wP_g3zMU
+
+{
+  "author": "The title or url is missing"
+}
+
+###
+POST http://localhost:3003/api/blogs/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkpvaG5Eb2UiLCJpZCI6IjY1ODljZDc0MWI2ODRiMDZhNjI2MTMxOSIsImlhdCI6MTcwMzUzMDAxNX0.U8VWjeFL1aPBSDyO0UqpPGFMnOJzaFXgBL6wP_g3zMU
+
+{
+  "author": "John Doe",
+  "title": "Example Domain",
+  "url": "https://example.com/",
+  "likes": 17
+}

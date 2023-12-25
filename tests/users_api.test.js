@@ -34,8 +34,7 @@ describe('POST /api/users', () => {
   test('a valid user added with statuscode 201', async () => {
     const newUser = {
       username: 'JohnDoe',
-      password: 'JohnDoe1800',
-      name: 'John Doe'
+      password: 'Doe'
     }
 
     await api

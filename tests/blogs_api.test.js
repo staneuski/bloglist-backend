@@ -6,8 +6,12 @@ const helper = require('./test_helper')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
+  await User.deleteMany({})
+  await User.insertMany(helper.initialUsers)
+
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
 })

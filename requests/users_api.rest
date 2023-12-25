@@ -1,0 +1,31 @@
+POST http://localhost:3003/api/users/ HTTP/1.1
+content-type: application/json
+
+{
+  "author": "The title or url is missing"
+}
+
+###
+POST http://localhost:3003/api/users/ HTTP/1.1
+content-type: application/json
+
+{
+  "username": "chantastic",
+  "password": "chan@react.dev",
+  "name": "Michael Chan"
+}
+
+###
+GET http://localhost:3003/api/users
+
+###
+PUT http://localhost:3003/api/users/658162fe01b40b8265d92b1a HTTP/1.1
+content-type: application/json
+
+{
+  "title": "Example Domain",
+  "author": "Jane Doe",
+  "url": "https://example.com/",
+  "likes": 8,
+  "id": "658162fe01b40b8265d92b1a"
+}

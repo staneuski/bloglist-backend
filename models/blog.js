@@ -2,8 +2,6 @@ const mongoose = require('mongoose')
 const REGEX_URL = /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})(\.[a-zA-Z0-9]{2,})?/
 
 const blogSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  author: { type: String, default: 'Anonymous' },
   url: {
     type: String,
     required: true,
@@ -12,6 +10,9 @@ const blogSchema = new mongoose.Schema({
       message: (props) => `${props.value} is not a valid URL!`,
     }
   },
+  title: { type: String, required: true },
+  author: { type: String, default: 'Anonymous' },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   likes: { type: Number, default: 0 }
 })
 

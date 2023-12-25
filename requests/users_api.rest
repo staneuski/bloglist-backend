@@ -2,7 +2,18 @@ POST http://localhost:3003/api/users/ HTTP/1.1
 content-type: application/json
 
 {
-  "author": "The title or url is missing"
+  "username": "JohnDoe",
+  "password": "John",
+  "name": "John Doe"
+}
+###
+POST http://localhost:3003/api/users/ HTTP/1.1
+content-type: application/json
+
+{
+  "username": "JohnDoe",
+  "password": "JD",
+  "name": "Short password: 400 Error"
 }
 
 ###
@@ -10,22 +21,21 @@ POST http://localhost:3003/api/users/ HTTP/1.1
 content-type: application/json
 
 {
-  "username": "chantastic",
-  "password": "chan@react.dev",
-  "name": "Michael Chan"
+  "username": "JD",
+  "password": "John",
+  "name": "Short username: 400 Error"
 }
 
 ###
 GET http://localhost:3003/api/users
 
 ###
-PUT http://localhost:3003/api/users/658162fe01b40b8265d92b1a HTTP/1.1
+PUT http://localhost:3003/api/users/6589c46fb43ffdeb2a632ca2 HTTP/1.1
 content-type: application/json
 
 {
-  "title": "Example Domain",
-  "author": "Jane Doe",
-  "url": "https://example.com/",
-  "likes": 8,
-  "id": "658162fe01b40b8265d92b1a"
+  "username": "JaneDoe",
+  "password": "Jane",
+  "name": "Jane Doe",
+  "id": "6589c46fb43ffdeb2a632ca2"
 }

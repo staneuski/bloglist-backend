@@ -11,7 +11,7 @@ const blogSchema = new mongoose.Schema({
     }
   },
   title: { type: String, required: true },
-  author: { type: String, default: 'Anonymous' },
+  author: String,
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   likes: { type: Number, default: 0 }
 })

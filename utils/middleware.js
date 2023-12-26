@@ -11,8 +11,16 @@ const errorHandler = (error, request, response, next) => { // eslint-disable-lin
   next(error)
 }
 
-const unknownEndpoint = (request, response) => {
+const tokenExtractor = (request, response, next) => { // eslint-disable-line no-unused-vars
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer '))
+    request.token = authorization.replace('Bearer ', '')
+
+  next()
+}
+
+const unknownEndpoint = (request, response) => { // eslint-disable-line no-unused-vars
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
-module.exports = { errorHandler, unknownEndpoint }
+module.exports = { errorHandler, tokenExtractor, unknownEndpoint }

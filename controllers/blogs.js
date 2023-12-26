@@ -34,8 +34,10 @@ blogsRouter.get('/:id', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', userExtractor, async (request, response) => {
-  if (!request.user.blogs.find(blog => blog.toString() === request.params.id))
-    response.status(401).json({ error: 'unauthorized operation' })
+  if (!request.user.blogs.find(blog => blog.toString() === request.params.id)) {
+    response.status(405).json({ error: 'unauthorized operation' })
+    return
+  }
 
   await Blog.findByIdAndDelete(request.params.id)
   response.status(204).end()

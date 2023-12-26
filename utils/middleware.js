@@ -29,8 +29,8 @@ const unknownEndpoint = (request, response) => { // eslint-disable-line no-unuse
 
 const userExtractor = async (request, response, next) => {
   if (!request.token) {
+    response.status(401).json({ error: 'unauthorised user' })
     next()
-    return
   }
 
   const decodedToken = jwt.verify(request.token, process.env.SECRET)

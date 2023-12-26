@@ -1,7 +1,8 @@
-const mongoose = require('mongoose')
-const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
+const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
+const supertest = require('supertest')
 
 const api = supertest(app)
 
@@ -14,6 +15,60 @@ beforeEach(async () => {
 
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
+})
+
+describe('GET /api/users', () => {
+  test('users are returned as json', async () => {
+    await api
+      .get('/api/users')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  test('there are expected users count', async () => {
+    const response = await api.get('/api/users')
+    expect(response.body).toHaveLength(helper.initialUsers.length)
+  })
+})
+
+describe('POST /api/users', () => {
+  test('a valid user added with statuscode 201', async () => {
+    const newUser = { username: 'JohnDoe', password: 'Doe' }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const response = await api.get('/api/users')
+    expect(response.body).toHaveLength(helper.initialUsers.length + 1)
+    expect(response.body.map(r => r.username)).toContain('JohnDoe')
+  })
+
+  test('fails with statuscode 400 if password is short', async () => {
+    const newUser = { username: 'JohnDoe', password: 'JD' }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    const response = await api.get('/api/users')
+    expect(response.body).toHaveLength(helper.initialUsers.length)
+  })
+
+  test('fails with statuscode 400 if username is short', async () => {
+    const newUser = { username: 'JD', password: 'JohnDoe', name: 'John Doe' }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    const response = await api.get('/api/users')
+    expect(response.body).toHaveLength(helper.initialUsers.length)
+  })
 })
 
 describe('GET /api/blogs', () => {
@@ -32,15 +87,21 @@ describe('GET /api/blogs', () => {
 
 describe('POST /api/blogs', () => {
   test('a valid blog can be added', async () => {
+    const user = helper.initialUsers[0]
+    const token = jwt.sign(
+      { username: user.username, id: user._id },
+      process.env.SECRET
+    )
+
     const newBlog = {
-      author: 'John Doe',
+      author: user.name,
       title: 'Example Domain',
-      url: 'https://example.com/',
-      likes: 17
+      url: 'https://example.com/'
     }
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -50,12 +111,36 @@ describe('POST /api/blogs', () => {
     expect(response.body.map(r => r.url)).toContain('https://example.com/')
   })
 
+  test('fails with status code 401 if unauthorized', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const newBlog = {
+      author: 'Unauthorized',
+      title: 'Example Domain',
+      url: 'https://example.com/'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length)
+  })
+
   test('likes property of a blog is 0 by default', async () => {
+    const user = helper.initialUsers[0]
+    const token = jwt.sign(
+      { username: user.username, id: user._id },
+      process.env.SECRET
+    )
+
     const newBlog = { title: 'Example Domain', url: 'https://example.com' }
     const blogsAtStart = await helper.blogsInDb()
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -66,10 +151,17 @@ describe('POST /api/blogs', () => {
   })
 
   test('blog without title or url is not added', async () => {
+    const user = helper.initialUsers[0]
+    const token = jwt.sign(
+      { username: user.username, id: user._id },
+      process.env.SECRET
+    )
+
     const newBlog = { author: 'the title or url is missing' }
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
 
@@ -88,7 +180,8 @@ describe('GET /api/blogs/:id', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    expect(resultBlog.body).toEqual(blogToView)
+    expect(resultBlog.body)
+      .toEqual({ ...blogToView, user: blogToView.user.toString() })
   })
 
   test('the unique identifier property of a blog is named id', async () => {
@@ -104,7 +197,7 @@ describe('GET /api/blogs/:id', () => {
     expect(resultBlog.body.id).toBeDefined()
   })
 
-  test('fails with statuscode 404 if blog does not exist', async () => {
+  test('fails with status code 404 if blog does not exist', async () => {
     const validNonexistingId = await helper.nonExistingId()
 
     await api
@@ -112,7 +205,7 @@ describe('GET /api/blogs/:id', () => {
       .expect(404)
   })
 
-  test('fails with statuscode 400 if id is invalid', async () => {
+  test('fails with status code 400 if id is invalid', async () => {
     const invalidId = '5a3d5da59070081a82a3445'
 
     await api
@@ -122,17 +215,47 @@ describe('GET /api/blogs/:id', () => {
 })
 
 describe('DELETE /api/blogs/:id', () => {
-  test('succeeds with status code 204 if id is valid', async () => {
+  test('succeeds with status code 204 if user is authorized', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
+    const user = helper.initialUsers.find(user =>
+      user._id === blogToDelete.user.toString()
+    )
+    const token = jwt.sign(
+      { username: user.username, id: user._id },
+      process.env.SECRET
+    )
+
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
     expect(blogsAtEnd.map(r => r.url)).not.toContain(blogToDelete.url)
+  })
+
+  test('fails with status code 405 if not owned', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    const user = helper.initialUsers.find(user =>
+      user._id !== blogToDelete.user.toString()
+    )
+    const token = jwt.sign(
+      { username: user.username, id: user._id },
+      process.env.SECRET
+    )
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(405)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length)
   })
 })
 

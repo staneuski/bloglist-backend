@@ -237,7 +237,7 @@ describe('DELETE /api/blogs/:id', () => {
     expect(blogsAtEnd.map(r => r.url)).not.toContain(blogToDelete.url)
   })
 
-  test('fails with status code 405 if not owned', async () => {
+  test('fails with status code 401 if not owned', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
@@ -252,7 +252,7 @@ describe('DELETE /api/blogs/:id', () => {
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(405)
+      .expect(401)
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(blogsAtStart.length)

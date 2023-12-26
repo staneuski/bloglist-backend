@@ -1,14 +1,14 @@
-const blogsRouter = require('express').Router()
+const router = require('express').Router()
 const Blog = require('../models/blog')
 const { userExtractor } = require('../utils/middleware')
 
-blogsRouter.get('/', async (request, response) => { // eslint-disable-line no-unused-vars
+router.get('/', async (request, response) => { // eslint-disable-line no-unused-vars
   const blogs = await Blog
     .find({}).populate('user', { username: 1, name: 1 })
   response.json(blogs)
 })
 
-blogsRouter.post('/', userExtractor, async (request, response) => {
+router.post('/', userExtractor, async (request, response) => {
   const user = request.user
   const blog = new Blog({
     user: user._id,
@@ -25,7 +25,7 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-blogsRouter.get('/:id', async (request, response) => {
+router.get('/:id', async (request, response) => {
   const blog = await Blog.findById(request.params.id)
   if (blog)
     response.json(blog)
@@ -33,7 +33,7 @@ blogsRouter.get('/:id', async (request, response) => {
     response.status(404).end()
 })
 
-blogsRouter.delete('/:id', userExtractor, async (request, response) => {
+router.delete('/:id', userExtractor, async (request, response) => {
   if (!request.user.blogs.find(blog => blog.toString() === request.params.id)) {
     response.status(405).json({ error: 'unauthorized operation' })
     return
@@ -43,7 +43,7 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
   response.status(204).end()
 })
 
-blogsRouter.put('/:id', (request, response, next) => {
+router.put('/:id', (request, response, next) => {
   const blog = { likes: request.body.likes }
   Blog.findByIdAndUpdate(request.params.id, blog, {
     new: true,
@@ -54,4 +54,4 @@ blogsRouter.put('/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-module.exports = blogsRouter
+module.exports = router

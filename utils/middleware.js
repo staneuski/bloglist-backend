@@ -27,7 +27,7 @@ const unknownEndpoint = (request, response) => { // eslint-disable-line no-unuse
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
-const userExtractor = async (request, response, next) => { // eslint-disable-line no-unused-vars
+const userExtractor = async (request, response, next) => {
   if (!request.token) {
     next()
     return

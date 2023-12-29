@@ -1,4 +1,5 @@
 const router = require('express').Router()
+
 const Blog = require('../models/blog')
 const { userExtractor } = require('../utils/middleware')
 

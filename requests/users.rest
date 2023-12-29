@@ -2,8 +2,8 @@ POST http://localhost:3003/api/users/ HTTP/1.1
 Content-Type: application/json
 
 {
-  "username": "JohnDoe",
-  "password": "Doe",
+  "username": "johndoe",
+  "password": "right",
   "name": "John Doe"
 }
 ###
@@ -11,7 +11,7 @@ POST http://localhost:3003/api/users/ HTTP/1.1
 Content-Type: application/json
 
 {
-  "username": "JohnDoe",
+  "username": "johndoe",
   "password": "JD",
   "name": "Short password: 400 Error"
 }
@@ -34,8 +34,8 @@ PUT http://localhost:3003/api/users/6589c46fb43ffdeb2a632ca2 HTTP/1.1
 Content-Type: application/json
 
 {
-  "username": "JaneDoe",
-  "password": "Doe",
+  "username": "janedoe",
+  "password": "right",
   "name": "Jane Doe",
   "id": "6589c46fb43ffdeb2a632ca2"
 }
